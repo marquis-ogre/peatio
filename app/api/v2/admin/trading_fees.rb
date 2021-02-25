@@ -18,7 +18,7 @@ module API
           optional :market_id,
                    type: String,
                    desc: -> { API::V2::Entities::TradingFee.documentation[:market_id][:desc] },
-                   values: { value: -> { ::Market.ids.append(::TradingFee::ANY) },
+                   values: { value: -> { ::Market.spot.pluck(:symbol).append(::TradingFee::ANY) },
                              message: 'admin.trading_fee.market_doesnt_exist' }
           use :pagination
           use :ordering
@@ -55,7 +55,7 @@ module API
                    type: String,
                    desc: -> { API::V2::Entities::TradingFee.documentation[:market_id][:desc] },
                    default: ::TradingFee::ANY,
-                   values: { value: -> { ::Market.ids.append(::TradingFee::ANY) },
+                   values: { value: -> { ::Market.spot.pluck(:symbol).append(::TradingFee::ANY) },
                              message: 'admin.trading_fee.market_doesnt_exist' }
         end
         post '/trading_fees/new' do
@@ -92,7 +92,7 @@ module API
           optional :market_id,
                    type: String,
                    desc: -> { API::V2::Entities::TradingFee.documentation[:market_id][:desc] },
-                   values: { value: -> { ::Market.ids.append(::TradingFee::ANY) },
+                   values: { value: -> { ::Market.spot.pluck(:symbol).append(::TradingFee::ANY) },
                              message: 'admin.trading_fee.market_doesnt_exist' }
         end
         post '/trading_fees/update' do

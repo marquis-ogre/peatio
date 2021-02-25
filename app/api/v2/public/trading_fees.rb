@@ -18,7 +18,7 @@ module API
           optional :market_id,
                    type: String,
                    desc: -> { API::V2::Entities::TradingFee.documentation[:market_id][:desc] },
-                   values: { value: -> { ::Market.ids.append(::TradingFee::ANY) },
+                   values: { value: -> { ::Market.spot.pluck(:symbol).append(::TradingFee::ANY) },
                              message: 'public.trading_fee.market_doesnt_exist' }
           use :pagination
           use :ordering

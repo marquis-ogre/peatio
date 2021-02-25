@@ -52,7 +52,7 @@ class TradingFee < ApplicationRecord
 
   # == Relationships ========================================================
 
-  belongs_to :market, optional: true
+  belongs_to :market, -> { where(type: 'spot') }, foreign_key: :market_id, primary_key: :symbol, optional: true
 
   # == Validations ==========================================================
 
@@ -68,7 +68,7 @@ class TradingFee < ApplicationRecord
 
   validates :market_id,
             presence: true,
-            inclusion: { in: ->(_fs){ Market.ids.append(ANY) } }
+            inclusion: { in: ->(_fs){ Market.spot.pluck(:symbol).append(ANY) } }
 
   validates :maker, :taker, precision: { less_than_or_eq_to: FEE_PRECISION }
 

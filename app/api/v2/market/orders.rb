@@ -7,20 +7,25 @@ module API
       class Orders < Grape::API
         helpers ::API::V2::Market::NamedParams
 
-        desc 'Get your orders, result is paginated.',
+        desc 'Get your spot or qe orders, result is paginated (by default - spot).',
           is_array: true,
           success: API::V2::Entities::Order
         params do
+          # Would be cool to validate market based on the market_type
           optional :market,
-                   values: { value: ->(v) { (Array.wrap(v) - ::Market.active.ids).blank? }, message: 'market.market.doesnt_exist' },
-                   desc: -> { V2::Entities::Market.documentation[:id] }
+                   values: { value: ->(v) { (Array.wrap(v) - ::Market.active.pluck(:symbol)).blank? }, message: 'market.market.doesnt_exist' },
+                   desc: -> { V2::Entities::Market.documentation[:symbol] }
+          optional :market_type,
+                   values: { value: -> { ::Market::TYPES }, message: 'market.market.invalid_market_type' },
+                   desc: -> { V2::Entities::Market.documentation[:type] },
+                   default: 'spot'
           optional :base_unit,
                    type: String,
-                   values: { value: -> { ::Market.active.pluck(:base_unit) }, message: 'market.market.doesnt_exist' },
+                   values: { value: -> { ::Market.spot.active.pluck(:base_unit) }, message: 'market.market.doesnt_exist' },
                    desc: -> { V2::Entities::Market.documentation[:base_unit] }
           optional :quote_unit,
                    type: String,
-                   values: { value: -> { ::Market.active.pluck(:quote_unit) }, message: 'market.market.doesnt_exist' },
+                   values: { value: -> { ::Market.spot.active.pluck(:base_unit) }, message: 'market.market.doesnt_exist' },
                    desc: -> { V2::Entities::Market.documentation[:quote_unit] }
           optional :state,
                    values: { value: ->(v) { (Array.wrap(v) - Order.state.values).blank? }, message: 'market.order.invalid_state' },
@@ -63,6 +68,7 @@ module API
           user_authorize! :read, ::Order
 
           current_user.orders.order(updated_at: params[:order_by])
+                      .tap { |q| q.where!(market_type: params[:market_type]) }
                       .tap { |q| q.where!(market: params[:market]) if params[:market] }
                       .tap { |q| q.where!(ask: params[:base_unit]) if params[:base_unit] }
                       .tap { |q| q.where!(bid: params[:quote_unit]) if params[:quote_unit] }
@@ -92,7 +98,7 @@ module API
           present order, with: API::V2::Entities::Order, type: :full
         end
 
-        desc 'Create a Sell/Buy order.',
+        desc 'Create a Sell/Buy spot order.',
           success: API::V2::Entities::Order
         params do
           use :enabled_markets, :order
@@ -107,7 +113,7 @@ module API
           present order, with: API::V2::Entities::Order
         end
 
-        desc 'Cancel an order.'
+        desc 'Cancel a spot order.'
         params do
           use :order_id
         end
@@ -116,9 +122,9 @@ module API
 
           begin
             if params[:id].match?(/\A[0-9]+\z/)
-              order = current_user.orders.find_by!(id: params[:id])
+              order = current_user.orders.spot.find_by!(id: params[:id])
             elsif UUID.validate(params[:id])
-              order = current_user.orders.find_by!(uuid: params[:id])
+              order = current_user.orders.spot.find_by!(uuid: params[:id])
             else
               error!({ errors: ['market.order.invaild_id_or_uuid'] }, 422)
             end
@@ -132,23 +138,24 @@ module API
           end
         end
 
-        desc 'Cancel all my orders.',
+        desc 'Cancel all my spot orders.',
           success: API::V2::Entities::Order
         params do
           optional :market,
                    type: String,
-                   values: { value: -> { ::Market.active.ids }, message: 'market.market.doesnt_exist' },
-                   desc: -> { V2::Entities::Market.documentation[:id] }
+                   values: {  value: -> { ::Market.spot.active.pluck(:symbol) }, message: 'market.market.doesnt_exist' },
+                   desc: -> { V2::Entities::Market.documentation[:symbol] }
           optional :side,
                    type: String,
                    values: %w(sell buy),
-                   desc: 'If present, only sell orders (asks) or buy orders (bids) will be canncelled.'
+                   desc: 'If present, only sell orders (asks) or buy orders (bids) will be cancelled.'
         end
         post '/orders/cancel' do
           user_authorize! :update, ::Order
 
           begin
             orders = current_user.orders
+                                 .spot
                                  .with_state(:wait)
                                  .tap { |q| q.where!(market: params[:market]) if params[:market] }
             if params[:side].present?

@@ -84,6 +84,13 @@ module API
               }
           )
 
+          expose(
+            :market_type,
+            documentation: {
+              type: String,
+              desc: "Spot or qe(quick exchange)."
+            }
+          )
 
           expose(
               :created_at,

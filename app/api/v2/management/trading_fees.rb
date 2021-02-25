@@ -15,7 +15,7 @@ module API
           optional :market_id,
                    type: String,
                    desc: 'Market id',
-                   values: { value: -> { ::Market.ids.append(::TradingFee::ANY) },
+                   values: { value: -> { ::Market.spot.pluck(:symbol).append(::TradingFee::ANY) },
                              message: 'Market does not exist' }
           optional :page, type: Integer, default: 1, integer_gt_zero: true, desc: 'The page number (defaults to 1).'
           optional :limit, type: Integer, default: 100, range: 1..1000, desc: 'The number of objects per page (defaults to 100, maximum is 1000).'

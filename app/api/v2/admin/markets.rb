@@ -53,11 +53,15 @@ module API
           end
         end
 
-        desc 'Get all markets, result is paginated.',
+        desc 'Get all spot or qe markets, result is paginated.',
           is_array: true,
           success: API::V2::Admin::Entities::Market
         params do
           use :pagination
+          optional :type,
+                   type: { value: String, message: 'admin.market.non_string_market_type' },
+                   values: { value: -> { ::Market::TYPES }, message: 'admin.market.invalid_market_type' },
+                   default: 'spot'
           optional :ordering,
                    values: { value: %w(asc desc), message: 'admin.pagination.invalid_ordering' },
                    default: 'asc',
@@ -69,7 +73,9 @@ module API
         get '/markets' do
           admin_authorize! :read, ::Market
 
-          result = ::Market.order(params[:order_by] => params[:ordering])
+          result = ::Market.where(type: params[:type])
+                           .order(params[:order_by] => params[:ordering])
+
           present paginate(result), with: API::V2::Admin::Entities::Market
         end
 
@@ -77,14 +83,18 @@ module API
           success API::V2::Admin::Entities::Market
         end
         params do
-          requires :id,
+          requires :symbol,
                    type: String,
-                   desc: -> { API::V2::Admin::Entities::Market.documentation[:id][:desc] }
+                   desc: -> { API::V2::Admin::Entities::Market.documentation[:symbol][:desc] }
+          optional :type,
+                   type: { value: String, message: 'admin.market.non_string_market_type' },
+                   values: { value: -> { ::Market::TYPES }, message: 'admin.market.invalid_market_type' },
+                   default: 'spot'
         end
-        get '/markets/:id', requirements: { id: /[\w\.\-]+/ } do
+        get '/markets/:symbol', requirements: { symbol: /[\w\.\-]+/ } do
           admin_authorize! :read, ::Market
 
-          present ::Market.find(params[:id]), with: API::V2::Admin::Entities::Market
+          present ::Market.find_by_symbol_and_type(params[:symbol], params[:type]), with: API::V2::Admin::Entities::Market
         end
 
         desc 'Create new market.' do
@@ -106,6 +116,10 @@ module API
                    type: { value: BigDecimal, message: 'admin.market.non_decimal_min_amount' },
                    values: { value: -> (p){ p && p >= 0 }, message: 'admin.market.invalid_min_amount' },
                    desc: -> { API::V2::Admin::Entities::Market.documentation[:min_amount][:desc] }
+          optional :type,
+                   type: { value: String, message: 'admin.market.non_string_market_type' },
+                   values: { value: -> { ::Market::TYPES }, message: 'admin.market.invalid_market_type' },
+                   default: 'spot'
           optional :engine_id,
                    type: { value: Integer, message: 'admin.market.non_integer_engine_id' },
                    desc: -> { API::V2::Admin::Entities::Market.documentation[:engine_id][:desc] }
@@ -135,8 +149,13 @@ module API
         end
         params do
           use :update_market_params
+          # Id parameter should be deprecated and changed to symbol
           requires :id,
                    desc: -> { API::V2::Admin::Entities::Market.documentation[:id][:desc] }
+          optional :type,
+                   type: { value: String, message: 'admin.market.non_string_market_type' },
+                   values: { value: -> { ::Market::TYPES }, message: 'admin.market.invalid_market_type' },
+                   default: 'spot'
           optional :engine_id,
                    type: { value: Integer, message: 'admin.market.non_integer_engine_id' },
                    desc: -> { API::V2::Admin::Entities::Market.documentation[:engine_id][:desc] }
@@ -157,8 +176,9 @@ module API
         post '/markets/update' do
           admin_authorize! :update, ::Market
 
-          market = ::Market.find(params[:id])
-          if market.update(declared(params, include_missing: false))
+          market = ::Market.find_by_symbol_and_type(params[:id], params[:type])
+          update_market_params = declared(params, include_missing: false).except(:id)
+          if market.update(update_market_params)
             present market, with: API::V2::Admin::Entities::Market
           else
             body errors: market.errors.full_messages

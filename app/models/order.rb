@@ -5,7 +5,7 @@ require 'csv'
 
 class Order < ApplicationRecord
 
-  belongs_to :market, required: true
+  belongs_to :market, ->(order) { where(type: order.market_type) }, foreign_key: :market_id, primary_key: :symbol, required: true
   belongs_to :member, required: true
   attribute :uuid, :uuid if Rails.configuration.database_adapter.downcase != 'PostgreSQL'.downcase
 
@@ -72,6 +72,8 @@ class Order < ApplicationRecord
   scope :done, -> { with_state(:done) }
   scope :active, -> { with_state(:wait) }
   scope :with_market, ->(market) { where(market_id: market) }
+  scope :spot, -> { where(market_type: 'spot') }
+  scope :qe, -> { where(market_type: 'qe') }
 
   # Custom ransackers.
 
@@ -153,7 +155,7 @@ class Order < ApplicationRecord
     end
 
     def to_csv
-      attributes = %w[id market_id ord_type side price volume origin_volume avg_price trades_count state created_at updated_at]
+      attributes = %w[id market_id market_type ord_type side price volume origin_volume avg_price trades_count state created_at updated_at]
 
       CSV.generate(headers: true) do |csv|
         csv << attributes
@@ -210,7 +212,7 @@ class Order < ApplicationRecord
   end
 
   def trades
-    Trade.where('maker_order_id = ? OR taker_order_id = ?', id, id)
+    Trade.where('market_type = ? AND (maker_order_id = ? OR taker_order_id = ?)', market_type, id, id)
   end
 
   def funds_used
