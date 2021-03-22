@@ -17,6 +17,10 @@ module API
             success: API::V2::Entities::Account
         params do
           use :pagination
+          optional :type,
+                   values: { value: ->(v) { (Array.wrap(v) - ::Account::TYPES).blank? }, message: 'account.type.doesnt_exist' },
+                   default: ::Account::DEFAULT_TYPE,
+                   desc: 'Accounts type.'
           optional :nonzero,
                    type: { value: Boolean, message: 'account.balances.invalid_nonzero' },
                    default: false,
@@ -39,17 +43,17 @@ module API
                                 .merge(m: 'or')
 
           accounts = ::Currency.visible.ransack(search_params).result.each_with_object([]) do |c, result|
-            account = ::Account.find_by(currency: c, member: current_user)
+            account = ::Account.find_by(currency: c, member: current_user, type: params[:type])
             if account.present?
               next if params[:nonzero].present? && account.amount.zero? && account.locked.zero?
 
               result << account
             elsif account.blank? && params[:nonzero].blank?
-              result << ::Account.new(currency: c, member: current_user)
+              result << ::Account.new(currency: c, member: current_user, type: ::Account::DEFAULT_TYPE)
             end
           end
 
-          present paginate(accounts),
+          present paginate(accounts.uniq),
                   with: Entities::Account, current_user: current_user
         end
 

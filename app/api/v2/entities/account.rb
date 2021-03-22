@@ -33,8 +33,16 @@ module API
         )
 
         expose(
+          :type,
+          documentation: {
+            desc: 'Account type.',
+            type: String
+          }
+        )
+
+        expose(
           :deposit_address,
-          if: ->(account, _options) { account.currency.coin? },
+          if: ->(account, _options) { account.currency.coin? && account.type == ::Account::DEFAULT_TYPE },
           using: API::V2::Entities::PaymentAddress,
           documentation: {
             desc: 'User deposit address',

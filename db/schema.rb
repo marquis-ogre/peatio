@@ -10,11 +10,12 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_03_02_120855) do
+ActiveRecord::Schema.define(version: 2021_03_22_134633) do
 
   create_table "accounts", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
     t.integer "member_id", null: false
     t.string "currency_id", limit: 10, null: false
+    t.string "type", default: "spot", null: false
     t.decimal "balance", precision: 32, scale: 16, default: "0.0", null: false
     t.decimal "locked", precision: 32, scale: 16, default: "0.0", null: false
     t.datetime "created_at", null: false

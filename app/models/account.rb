@@ -2,7 +2,11 @@
 
 class Account < ApplicationRecord
   AccountError = Class.new(StandardError)
+  DEFAULT_TYPE = Peatio::App.config.default_account_type
 
+  TYPES = Peatio::App.config.account_types.split(',') << DEFAULT_TYPE
+
+  self.inheritance_column = nil
   belongs_to :currency, required: true
   belongs_to :member, required: true
 
