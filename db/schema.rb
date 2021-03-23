@@ -378,23 +378,22 @@ ActiveRecord::Schema.define(version: 2021_03_02_120855) do
     t.index ["maker_id", "market_type"], name: "index_trades_on_maker_id_and_market_type"
     t.index ["maker_id"], name: "index_trades_on_maker_id"
     t.index ["maker_order_id"], name: "index_trades_on_maker_order_id"
-    t.index ["market_id", "created_at"], name: "index_trades_on_market_id_and_created_at"
     t.index ["taker_id", "market_type"], name: "index_trades_on_taker_id_and_market_type"
-    t.index ["taker_id"], name: "index_trades_on_taker_id"
     t.index ["taker_order_id"], name: "index_trades_on_taker_order_id"
     t.index ["taker_type"], name: "index_trades_on_taker_type"
   end
 
   create_table "trading_fees", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
     t.string "market_id", limit: 20, default: "any", null: false
+    t.string "market_type", default: "spot", null: false
     t.string "group", limit: 32, default: "any", null: false
     t.decimal "maker", precision: 7, scale: 6, default: "0.0", null: false
     t.decimal "taker", precision: 7, scale: 6, default: "0.0", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["group"], name: "index_trading_fees_on_group"
-    t.index ["market_id", "group"], name: "index_trading_fees_on_market_id_and_group", unique: true
-    t.index ["market_id"], name: "index_trading_fees_on_market_id"
+    t.index ["market_id", "market_type", "group"], name: "index_trading_fees_on_market_id_and_market_type_and_group", unique: true
+    t.index ["market_id", "market_type"], name: "index_trading_fees_on_market_id_and_market_type"
   end
 
   create_table "transactions", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|

@@ -79,7 +79,7 @@ module API
           :market_type,
           documentation: {
             type: String,
-            desc: "Spot or qe(quick exchange)."
+            desc: "Market type."
           }
         )
 

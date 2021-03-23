@@ -20,7 +20,7 @@ module API
           optional :market_type,
                    values: { value: -> { ::Market::TYPES }, message: 'market.market.invalid_market_type' },
                    desc: -> {  API::V2::Management::Entities::Market.documentation[:type][:desc] },
-                   default: 'spot'
+                   default: -> { ::Market::DEFAULT_TYPE }
           optional :state,
                    values: { value: -> { ::Order.state.values }, message: 'management.orders.invalid_state' },
                    desc: 'Filter order by state.'
@@ -84,7 +84,7 @@ module API
           optional :market_type,
                    values: { value: -> { ::Market::TYPES }, message: 'market.market.invalid_market_type' },
                    desc: -> {  API::V2::Management::Entities::Market.documentation[:type][:desc] },
-                   default: 'spot'
+                   default: -> { ::Market::DEFAULT_TYPE }
         end
 
         post '/orders/cancel' do

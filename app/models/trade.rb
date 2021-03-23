@@ -20,6 +20,10 @@ class Trade < ApplicationRecord
 
   validates :price, :amount, :total, numericality: { greater_than_or_equal_to: 0.to_d }
 
+  validates :market_type,
+            presence: true,
+            inclusion: { in: -> { Market::TYPES } }
+
   # == Scopes ===============================================================
 
   scope :h24, -> { where('created_at > ?', 24.hours.ago) }

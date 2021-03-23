@@ -20,12 +20,16 @@ module API
                    desc: -> { API::V2::Entities::TradingFee.documentation[:market_id][:desc] },
                    values: { value: -> { ::Market.spot.pluck(:symbol).append(::TradingFee::ANY) },
                              message: 'public.trading_fee.market_doesnt_exist' }
+          optional :market_type,
+                   values: { value: -> { ::Market::TYPES }, message: 'management.trading_fee.invalid_market_type' },
+                   desc: -> { API::V2::Admin::Entities::Market.documentation[:type] },
+                   default: -> { ::Market::DEFAULT_TYPE }
           use :pagination
           use :ordering
         end
         get '/trading_fees' do
           ransack_params = API::V2::Admin::Helpers::RansackBuilder.new(params)
-                             .eq(:group, :market_id)
+                             .eq(:group, :market_id, :market_type)
                              .build
 
           search = TradingFee.ransack(ransack_params)

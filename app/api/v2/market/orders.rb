@@ -7,7 +7,7 @@ module API
       class Orders < Grape::API
         helpers ::API::V2::Market::NamedParams
 
-        desc 'Get your spot or qe orders, result is paginated (by default - spot).',
+        desc 'Get your orders, result is paginated.',
           is_array: true,
           success: API::V2::Entities::Order
         params do
@@ -18,7 +18,7 @@ module API
           optional :market_type,
                    values: { value: -> { ::Market::TYPES }, message: 'market.market.invalid_market_type' },
                    desc: -> { V2::Entities::Market.documentation[:type] },
-                   default: 'spot'
+                   default: -> { ::Market::DEFAULT_TYPE }
           optional :base_unit,
                    type: String,
                    values: { value: -> { ::Market.spot.active.pluck(:base_unit) }, message: 'market.market.doesnt_exist' },
@@ -98,7 +98,7 @@ module API
           present order, with: API::V2::Entities::Order, type: :full
         end
 
-        desc 'Create a Sell/Buy spot order.',
+        desc 'Create a Sell/Buy order.',
           success: API::V2::Entities::Order
         params do
           use :enabled_markets, :order
@@ -113,7 +113,7 @@ module API
           present order, with: API::V2::Entities::Order
         end
 
-        desc 'Cancel a spot order.'
+        desc 'Cancel a order.'
         params do
           use :order_id
         end
@@ -138,7 +138,7 @@ module API
           end
         end
 
-        desc 'Cancel all my spot orders.',
+        desc 'Cancel all my orders.',
           success: API::V2::Entities::Order
         params do
           optional :market,

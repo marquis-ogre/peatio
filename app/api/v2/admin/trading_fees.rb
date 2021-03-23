@@ -20,6 +20,10 @@ module API
                    desc: -> { API::V2::Entities::TradingFee.documentation[:market_id][:desc] },
                    values: { value: -> { ::Market.spot.pluck(:symbol).append(::TradingFee::ANY) },
                              message: 'admin.trading_fee.market_doesnt_exist' }
+          optional :market_type,
+                   values: { value: -> { ::Market::TYPES }, message: 'admin.trading_fee.invalid_market_type' },
+                   desc: -> { API::V2::Admin::Entities::Market.documentation[:type] },
+                   default: -> { ::Market::DEFAULT_TYPE }
           use :pagination
           use :ordering
         end
@@ -27,7 +31,7 @@ module API
           admin_authorize! :read, TradingFee
 
           ransack_params = Helpers::RansackBuilder.new(params)
-                             .eq(:group, :market_id)
+                             .eq(:group, :market_id, :market_type)
                              .build
 
           search = TradingFee.ransack(ransack_params)
@@ -57,6 +61,10 @@ module API
                    default: ::TradingFee::ANY,
                    values: { value: -> { ::Market.spot.pluck(:symbol).append(::TradingFee::ANY) },
                              message: 'admin.trading_fee.market_doesnt_exist' }
+          optional :market_type,
+                   values: { value: -> { ::Market::TYPES }, message: 'admin.trading_fee.invalid_market_type' },
+                   desc: -> { API::V2::Admin::Entities::Market.documentation[:type] },
+                   default: -> { ::Market::DEFAULT_TYPE }
         end
         post '/trading_fees/new' do
           admin_authorize! :create, TradingFee
@@ -94,6 +102,10 @@ module API
                    desc: -> { API::V2::Entities::TradingFee.documentation[:market_id][:desc] },
                    values: { value: -> { ::Market.spot.pluck(:symbol).append(::TradingFee::ANY) },
                              message: 'admin.trading_fee.market_doesnt_exist' }
+          optional :market_type,
+                   values: { value: -> { ::Market::TYPES }, message: 'admin.trading_fee.invalid_market_type' },
+                   desc: -> { API::V2::Admin::Entities::Market.documentation[:type] },
+                   default: -> { ::Market::DEFAULT_TYPE }
         end
         post '/trading_fees/update' do
           admin_authorize! :update, TradingFee

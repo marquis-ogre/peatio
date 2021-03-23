@@ -22,7 +22,7 @@ module API
           optional :type,
                    type: { value: String },
                    values: { value: -> { ::Market::TYPES }},
-                   default: 'spot'
+                   default: -> { ::Market::DEFAULT_TYPE }
           optional :state,
                    type: String,
                    values: { value: ::Market::STATES },
@@ -63,7 +63,7 @@ module API
         end
 
         # POST: api/v2/management/markets/list
-        desc 'Return list of spot or qe markets(by default - spot).' do
+        desc 'Return list of the markets.' do
           @settings[:scope] = :read_markets
           success API::V2::Management::Entities::Market
         end
@@ -72,7 +72,7 @@ module API
           optional :type,
                    type: { value: String },
                    values: { value: -> { ::Market::TYPES }},
-                   default: 'spot'
+                   default: -> { ::Market::DEFAULT_TYPE }
         end
 
         post '/markets/list' do

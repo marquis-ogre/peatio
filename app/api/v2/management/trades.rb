@@ -18,7 +18,7 @@ module API
           optional :market_type,
                    values: { value: -> { ::Market::TYPES }, message: 'market.market.invalid_market_type' },
                    desc: -> { V2::Entities::Market.documentation[:type] },
-                   default: 'spot'
+                   default: -> { ::Market::DEFAULT_TYPE }
           optional :page,     type: Integer, default: 1,   integer_gt_zero: true, desc: 'The page number (defaults to 1).'
           optional :limit,    type: Integer, default: 100, range: 1..1000, desc: 'The number of objects per page (defaults to 100, maximum is 1000).'
         end

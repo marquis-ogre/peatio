@@ -47,11 +47,18 @@ class AddMarketType < ActiveRecord::Migration[5.2]
 
 
     add_column(:trades, :market_type, :string, null: false, default: 'spot', after: 'market_id')
-    remove_index(:trades, 'maker_id') if index_exists?(:orders, 'market_id')
-    remove_index(:trades, 'taker_id') if index_exists?(:orders, 'taker_id')
-    remove_index(:trades, %w[market_id created_at]) if index_exists?(:orders, %w[market_id created_at])
-    add_index(:trades, %w[maker_id market_type]) unless index_exists?(:orders, %w[maker_id market_type])
-    add_index(:trades, %w[taker_id market_type]) unless index_exists?(:orders, %w[taker_id market_type])
-    add_index(:trades, %w[maker_id market_type created_at]) unless index_exists?(:orders, %w[maker_id market_type created_at])
+    remove_index(:trades, 'maker_id') if index_exists?(:trades, 'market_id')
+    remove_index(:trades, 'taker_id') if index_exists?(:trades, 'taker_id')
+    remove_index(:trades, %w[market_id created_at]) if index_exists?(:trades, %w[market_id created_at])
+    add_index(:trades, %w[maker_id market_type]) unless index_exists?(:trades, %w[maker_id market_type])
+    add_index(:trades, %w[taker_id market_type]) unless index_exists?(:trades, %w[taker_id market_type])
+    add_index(:trades, %w[maker_id market_type created_at]) unless index_exists?(:trades, %w[maker_id market_type created_at])
+
+
+    add_column(:trading_fees, :market_type, :string, null: false, default: 'spot', after: 'market_id')
+    remove_index(:trading_fees, %w[market_id group]) if index_exists?(:trading_fees, %w[market_id group])
+    remove_index(:trading_fees, 'market_id') if index_exists?(:trading_fees, 'market_id')
+    add_index(:trading_fees, %w[market_id market_type group], unique: true) unless index_exists?(:trading_fees, %w[market_id market_type group])
+    add_index(:trading_fees, %w[market_id market_type]) unless index_exists?(:trading_fees, %w[market_id market_type])
   end
 end

@@ -20,7 +20,7 @@ module API
           optional :market_type,
                    values: { value: -> { ::Market::TYPES }, message: 'admin.market.invalid_market_type' },
                    desc: -> { API::V2::Admin::Entities::Market.documentation[:type][:desc] },
-                   default: 'spot'
+                   default: -> { ::Market::DEFAULT_TYPE }
           optional :state,
                    values: { value: -> { ::Order.state.values }, message: 'admin.order.invalid_state' },
                    desc: 'Filter order by state.'
@@ -109,7 +109,7 @@ module API
 
           begin
             ransack_params = Helpers::RansackBuilder.new(params)
-                                    .eq(state: 'wait', market_type: 'spot')
+                                    .eq(state: 'wait', market_type: ::Market::DEFAULT_TYPE)
                                     .translate(market: :market_id)
                                     .merge({
                                       type_eq: params[:side].present? ? params[:side] == 'buy' ? 'OrderBid' : 'OrderAsk' : nil,

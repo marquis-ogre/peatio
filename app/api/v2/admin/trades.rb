@@ -21,7 +21,7 @@ module API
           optional :market_type,
                    values: { value: -> { ::Market::TYPES }, message: 'market.market.invalid_market_type' },
                    desc: -> { API::V2::Admin::Entities::Market.documentation[:type] },
-                   default: 'spot'
+                   default: -> { ::Market::DEFAULT_TYPE }
           optional :order_id,
                    type: Integer,
                    desc: -> { API::V2::Entities::Order.documentation[:id][:desc] }

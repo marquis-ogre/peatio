@@ -53,7 +53,7 @@ module API
           end
         end
 
-        desc 'Get all spot or qe markets, result is paginated.',
+        desc 'Get all markets, result is paginated.',
           is_array: true,
           success: API::V2::Admin::Entities::Market
         params do
@@ -61,7 +61,7 @@ module API
           optional :type,
                    type: { value: String, message: 'admin.market.non_string_market_type' },
                    values: { value: -> { ::Market::TYPES }, message: 'admin.market.invalid_market_type' },
-                   default: 'spot'
+                   default: -> { ::Market::DEFAULT_TYPE }
           optional :ordering,
                    values: { value: %w(asc desc), message: 'admin.pagination.invalid_ordering' },
                    default: 'asc',
@@ -89,7 +89,7 @@ module API
           optional :type,
                    type: { value: String, message: 'admin.market.non_string_market_type' },
                    values: { value: -> { ::Market::TYPES }, message: 'admin.market.invalid_market_type' },
-                   default: 'spot'
+                   default: -> { ::Market::DEFAULT_TYPE }
         end
         get '/markets/:symbol', requirements: { symbol: /[\w\.\-]+/ } do
           admin_authorize! :read, ::Market
@@ -119,7 +119,7 @@ module API
           optional :type,
                    type: { value: String, message: 'admin.market.non_string_market_type' },
                    values: { value: -> { ::Market::TYPES }, message: 'admin.market.invalid_market_type' },
-                   default: 'spot'
+                   default: -> { ::Market::DEFAULT_TYPE }
           optional :engine_id,
                    type: { value: Integer, message: 'admin.market.non_integer_engine_id' },
                    desc: -> { API::V2::Admin::Entities::Market.documentation[:engine_id][:desc] }
@@ -155,7 +155,7 @@ module API
           optional :type,
                    type: { value: String, message: 'admin.market.non_string_market_type' },
                    values: { value: -> { ::Market::TYPES }, message: 'admin.market.invalid_market_type' },
-                   default: 'spot'
+                   default: -> { ::Market::DEFAULT_TYPE }
           optional :engine_id,
                    type: { value: Integer, message: 'admin.market.non_integer_engine_id' },
                    desc: -> { API::V2::Admin::Entities::Market.documentation[:engine_id][:desc] }

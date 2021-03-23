@@ -41,6 +41,7 @@ class Market < ApplicationRecord
   TYPES = %w[spot qe].freeze
   # spot - regular spot market
   # qe - market used by Finex for quick exchange
+  DEFAULT_TYPE = 'spot'
 
   # == Attributes ===========================================================
 

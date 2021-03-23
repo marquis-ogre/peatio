@@ -28,6 +28,10 @@ class Order < ApplicationRecord
   belongs_to :bid_currency, class_name: 'Currency', foreign_key: :bid
   after_commit :trigger_event
 
+  validates :market_type,
+            presence: true,
+            inclusion: { in: -> { Market::TYPES } }
+
   validates :ord_type, :volume, :origin_volume, :locked, :origin_locked, presence: true
   validates :price, numericality: { greater_than: 0 }, if: ->(order) { order.ord_type == 'limit' }
 

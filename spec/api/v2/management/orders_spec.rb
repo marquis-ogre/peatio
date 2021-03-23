@@ -35,7 +35,7 @@ describe API::V2::Management::Orders, type: :request do
 
     let(:data) { {} }
 
-    it 'returns all spot orders on the platform' do
+    it 'returns all orders on the platform' do
       request
 
       expect(response).to have_http_status 200
