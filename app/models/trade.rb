@@ -22,7 +22,7 @@ class Trade < ApplicationRecord
 
   validates :market_type,
             presence: true,
-            inclusion: { in: -> { Market::TYPES } }
+            inclusion: { in: Market::TYPES }
 
   # == Scopes ===============================================================
 

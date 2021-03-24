@@ -90,6 +90,8 @@ class Market < ApplicationRecord
 
   validates :type, inclusion: { in: TYPES }
 
+  validates :market_type, presence: true, inclusion: { in: Market::TYPES }
+
   validates :base_currency, :quote_currency, presence: true
 
   validates :min_price, :max_price, precision: { less_than_or_eq_to: ->(m) { m.price_precision } }
