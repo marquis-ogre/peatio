@@ -86,9 +86,10 @@ module API
           requires :currency,       type: String, values: -> { Currency.codes(bothcase: true) }, desc: 'The currency code.'
           requires :amount,         type: BigDecimal, desc: 'The amount to withdraw.'
           optional :note,           type: String, desc: 'The note for withdraw.'
+          optional :fee,            type: BigDecimal, values: { value: -> (p){ p >= 0 }, message: 'management.withdraw.invalid_fee' }, desc: API::V2::Admin::Entities::Withdraw.documentation[:fee][:desc]
           optional :action,         type: String, values: %w[process], desc: 'The action to perform.'
           optional :transfer_type,  type: String,
-                                    values: { value: -> { Withdraw::TRANSFER_TYPES.keys }, message: 'account.withdraw.transfer_type_not_in_list' },
+                                    values: { value: -> { Withdraw::TRANSFER_TYPES.keys }, message: 'management.withdraw.transfer_type_not_in_list' },
                                     desc: -> { API::V2::Admin::Entities::Withdraw.documentation[:transfer_type][:desc] }
 
           exactly_one_of :rid, :beneficiary_id
@@ -112,7 +113,7 @@ module API
             error!({ errors: ['TID already exist'] }, 422) if Withdraw.where(tid: params[:tid]).present?
           end
 
-          declared_params = declared(params, include_missing: false).slice(:tid, :rid, :note, :transfer_type).merge(
+          declared_params = declared(params, include_missing: false).slice(:tid, :rid, :note, :transfer_type, :fee).merge(
             sum: params[:amount],
             member: member,
             currency: currency,

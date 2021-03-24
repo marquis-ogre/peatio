@@ -123,6 +123,7 @@ describe API::V2::Management::Withdraws, type: :request do
           { uid:      member.uid,
             currency: currency.code,
             amount:   amount.to_s,
+            fee:      0,
             beneficiary_id: beneficiary.id }
         end
 
@@ -131,6 +132,7 @@ describe API::V2::Management::Withdraws, type: :request do
           expect(response).to have_http_status(201)
           record = Withdraw.find_by_tid!(JSON.parse(response.body).fetch('tid'))
           expect(record.sum).to eq 0.1575
+          expect(record.fee).to eq 0
           expect(record.aasm_state).to eq 'accepted'
           expect(record.rid).to eq beneficiary.rid
           expect(record.account).to eq account
