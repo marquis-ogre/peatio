@@ -90,7 +90,6 @@ module API
             # RecordNotFound in rescued by ExceptionsHandler.
             raise(e)
           rescue => e
-            pp e
             error!({ errors: ['admin.order.cancel_error'] }, 422)
           end
         end
@@ -109,7 +108,7 @@ module API
 
           begin
             ransack_params = Helpers::RansackBuilder.new(params)
-                                    .eq(state: 'wait', market_type: ::Market::DEFAULT_TYPE)
+                                    .eq(state: 'wait', market_type: 'spot')
                                     .translate(market: :market_id)
                                     .merge({
                                       type_eq: params[:side].present? ? params[:side] == 'buy' ? 'OrderBid' : 'OrderAsk' : nil,

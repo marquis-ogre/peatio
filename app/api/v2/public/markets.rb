@@ -11,7 +11,7 @@ module API
         class OrderBook < Struct.new(:asks, :bids); end
 
         resource :markets do
-          desc 'Based on type, get all available markets (by default, spot).',
+          desc 'Get all available markets.',
             is_array: true,
             success: API::V2::Entities::Market
           params do

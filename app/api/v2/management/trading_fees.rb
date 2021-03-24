@@ -15,7 +15,7 @@ module API
           optional :market_id,
                    type: String,
                    desc: 'Market id',
-                   values: { value: -> { ::Market.spot.pluck(:symbol).append(::TradingFee::ANY) },
+                   values: { value: -> { ::Market.pluck(:symbol).append(::TradingFee::ANY) },
                              message: 'Market does not exist' }
           optional :market_type,
                    values: { value: -> { ::Market::TYPES }, message: 'management.trading_fee.invalid_market_type' },

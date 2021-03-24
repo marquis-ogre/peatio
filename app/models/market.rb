@@ -88,9 +88,7 @@ class Market < ApplicationRecord
 
   validates :symbol, uniqueness: { scope: :type, case_sensitive: false }, presence: true
 
-  validates :type, inclusion: { in: TYPES }
-
-  validates :market_type, presence: true, inclusion: { in: Market::TYPES }
+  validates :type, presence: true, inclusion: { in: TYPES }
 
   validates :base_currency, :quote_currency, presence: true
 

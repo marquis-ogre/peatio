@@ -63,6 +63,18 @@ describe Market do
       expect(record.save).to eq true
     end
 
+    it 'validates type precision' do
+      record = Market.new(valid_attributes.merge(type: ''))
+      record.save
+      expect(record.errors.full_messages).to include(/can\'t be blank/i)
+    end
+
+    it 'validates type value' do
+      record = Market.new(valid_attributes.merge(type: 'invalid'))
+      record.save
+      expect(record.errors.full_messages).to include(/is not included in the list/i)
+    end
+
     it 'validates quote currency duplication' do
       record = Market.new(valid_attributes.merge(quote_currency: valid_attributes[:base_currency]))
       record.save

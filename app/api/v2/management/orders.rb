@@ -6,7 +6,7 @@ module API
       class Orders < Grape::API
         helpers ::API::V2::OrderHelpers
 
-        desc 'Returns orders (by default - spot)' do
+        desc 'Returns orders' do
           @settings[:scope] = :read_orders
           success API::V2::Management::Entities::Order
         end
@@ -79,7 +79,7 @@ module API
                    values: { value: ->(v) { Member.exists?(uid: v) }, message: 'management.orders.uid_doesnt_exist' },
                    desc: 'Filter order by owner uid'
           requires :market,
-                   values: { value: -> { ::Market.spot.active.pluck(:symbol) }, message: 'management.order.market_doesnt_exist' },
+                   values: { value: -> { ::Market.active.pluck(:symbol) }, message: 'management.order.market_doesnt_exist' },
                    desc: -> { API::V2::Management::Entities::Market.documentation[:id][:desc] }
           optional :market_type,
                    values: { value: -> { ::Market::TYPES }, message: 'market.market.invalid_market_type' },

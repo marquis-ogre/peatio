@@ -21,11 +21,11 @@ module API
                    default: -> { ::Market::DEFAULT_TYPE }
           optional :base_unit,
                    type: String,
-                   values: { value: -> { ::Market.spot.active.pluck(:base_unit) }, message: 'market.market.doesnt_exist' },
+                   values: { value: -> { ::Market.active.pluck(:base_unit) }, message: 'market.market.doesnt_exist' },
                    desc: -> { V2::Entities::Market.documentation[:base_unit] }
           optional :quote_unit,
                    type: String,
-                   values: { value: -> { ::Market.spot.active.pluck(:base_unit) }, message: 'market.market.doesnt_exist' },
+                   values: { value: -> { ::Market.active.pluck(:base_unit) }, message: 'market.market.doesnt_exist' },
                    desc: -> { V2::Entities::Market.documentation[:quote_unit] }
           optional :state,
                    values: { value: ->(v) { (Array.wrap(v) - Order.state.values).blank? }, message: 'market.order.invalid_state' },
@@ -113,7 +113,7 @@ module API
           present order, with: API::V2::Entities::Order
         end
 
-        desc 'Cancel a order.'
+        desc 'Cancel an order.'
         params do
           use :order_id
         end
@@ -143,8 +143,12 @@ module API
         params do
           optional :market,
                    type: String,
-                   values: {  value: -> { ::Market.spot.active.pluck(:symbol) }, message: 'market.market.doesnt_exist' },
+                   values: {  value: -> { ::Market.active.pluck(:symbol) }, message: 'market.market.doesnt_exist' },
                    desc: -> { V2::Entities::Market.documentation[:symbol] }
+          optional :market_type,
+                   values: { value: -> { ::Market::TYPES }, message: 'market.market.invalid_market_type' },
+                   desc: -> { V2::Entities::Market.documentation[:type] },
+                   default: -> { ::Market::DEFAULT_TYPE }
           optional :side,
                    type: String,
                    values: %w(sell buy),
@@ -155,8 +159,8 @@ module API
 
           begin
             orders = current_user.orders
-                                 .spot
                                  .with_state(:wait)
+                                 .tap { |q| q.where!(market_type: params[:market_type]) }
                                  .tap { |q| q.where!(market: params[:market]) if params[:market] }
             if params[:side].present?
               type = params[:side] == 'sell' ? 'OrderAsk' : 'OrderBid'
